@@ -103,11 +103,11 @@ var tick = function () {
   if (leftHeld)
     player.x -= MOVE_SPEED;
   if (upHeld)
-    player.y += MOVE_SPEED;
+    player.y -= MOVE_SPEED;
   if (rightHeld)
     player.x += MOVE_SPEED;
   if (downHeld)
-    player.y -= MOVE_SPEED;
+    player.y += MOVE_SPEED;
     
   stage.update();
 }
