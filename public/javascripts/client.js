@@ -52,12 +52,12 @@ function eventHandlers(){
       case KEYCODE_D: rightHeld = true; return false;
       case KEYCODE_DOWN:
       case KEYCODE_S: downHeld = true; return false;
-    };
+    }
 
   });
   $(document).keyup(function (event) {
     // cross-browser compatibility
-    if (!event) { var event = window.event; }
+    if (!event) { event = window.event; }
     switch(event.keyCode) {
       // not sure why they return false in the example
       // http://www.createjs.com/Demos/EaselJS/Game.html
@@ -69,7 +69,7 @@ function eventHandlers(){
       case KEYCODE_D: rightHeld = false; break;
       case KEYCODE_DOWN:
       case KEYCODE_S: downHeld = false; break;
-    };
+    }
   });
 }
 
@@ -112,4 +112,4 @@ var tick = function () {
     player.y += MOVE_SPEED;
 
   stage.update();
-}
+};
