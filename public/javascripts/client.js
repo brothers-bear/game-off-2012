@@ -1,3 +1,6 @@
+var CANVAS_WIDTH = 800;
+var CANVAS_HEIGHT= 600;
+
 var KEYCODE_LEFT = 37;  //useful keycode
 var KEYCODE_UP = 38;    //useful keycode
 var KEYCODE_RIGHT = 39; //useful keycode
@@ -28,6 +31,9 @@ var preloader;
 
 //on document load, create keyhandlers
 $(document).ready(function(){
+  canvas = $('#game')[0];
+  canvas.width = CANVAS_WIDTH;
+  canvas.height= CANVAS_HEIGHT;
   initCanvas();
   eventHandlers();
  });
@@ -73,16 +79,15 @@ function eventHandlers(){
 
 
 var initCanvas = function () {
-  canvas = $('#game')[0];
   context = canvas.getContext('2d');
-  
+
   stage = new createjs.Stage(canvas);
   stage.mouseEventsEnabled = true;
-  
+
   var manifest = [
     {src: '/images/antigoliath.jpg', id: 'player'}
   ];
-  
+
   preloader = new createjs.PreloadJS();
   preloader.onComplete = initGame;
   preloader.loadManifest(manifest);
@@ -94,7 +99,7 @@ var initGame = function () {
   player.y = canvas.height / 2;
   stage.addChild(player);
   stage.update();
-  
+
   createjs.Ticker.addListener(window);
 };
 
@@ -109,7 +114,7 @@ var tick = function () {
     player.x += MOVE_SPEED;
   if (downHeld)
     player.y += MOVE_SPEED;
-    
+
   stage.update();
 }
 
