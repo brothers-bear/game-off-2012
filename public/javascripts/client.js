@@ -26,11 +26,9 @@ var leftHeld, upHeld, rightHeld, downHeld;
 // Utilities
 var preloader;
 
-//document.onkeydown = handleKeyDown;
-//document.onkeyup = handleKeyUp;
 
 //on document load, create keyhandlers
-$(document).ready(function(){
+$(document).ready(function () {
   canvas = $('#game')[0];
   canvas.width = CANVAS_WIDTH;
   canvas.height= CANVAS_HEIGHT;
@@ -38,13 +36,11 @@ $(document).ready(function(){
   eventHandlers();
  });
 
+
 function eventHandlers(){
-  console.log($('#game'));
-  $(document).keydown(function(event){
-    console.log('hi');
+  $(document).keydown(function (event) {
     // cross-browser compatibility
     if (!event) { var event = window.event; }
-    console.log('yes!' + event.keyCode);
     switch(event.keyCode) {
       // not sure why they return false in the example
       // http://www.createjs.com/Demos/EaselJS/Game.html
@@ -59,7 +55,7 @@ function eventHandlers(){
     };
 
   });
-  $(document).keyup(function(event){
+  $(document).keyup(function (event) {
     // cross-browser compatibility
     if (!event) { var event = window.event; }
     switch(event.keyCode) {
@@ -93,6 +89,7 @@ var initCanvas = function () {
   preloader.loadManifest(manifest);
 };
 
+
 var initGame = function () {
   player = new createjs.Bitmap(preloader.getResult('player').result);
   player.x = canvas.width / 2;
@@ -103,9 +100,8 @@ var initGame = function () {
   createjs.Ticker.addListener(window);
 };
 
+
 var tick = function () {
-  player.x -= Math.random();
-  player.y -= Math.random();
   if (leftHeld)
     player.x -= MOVE_SPEED;
   if (upHeld)
@@ -117,6 +113,3 @@ var tick = function () {
 
   stage.update();
 }
-
-
-
