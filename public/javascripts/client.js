@@ -28,6 +28,7 @@ var preloader;
 
 //on document load, create keyhandlers
 $(document).ready(function(){
+  initCanvas();
   eventHandlers();
  });
 
