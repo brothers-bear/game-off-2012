@@ -23,11 +23,56 @@ var leftHeld, upHeld, rightHeld, downHeld;
 // Utilities
 var preloader;
 
-document.onkeydown = handleKeyDown;
-document.onkeyup = handleKeyUp;
+//document.onkeydown = handleKeyDown;
+//document.onkeyup = handleKeyUp;
+
+//on document load, create keyhandlers
+$(document).ready(function(){
+  eventHandlers();
+ });
+
+function eventHandlers(){
+  console.log($('#game'));
+  $(document).keydown(function(event){
+    console.log('hi');
+    // cross-browser compatibility
+    if (!event) { var event = window.event; }
+    console.log('yes!' + event.keyCode);
+    switch(event.keyCode) {
+      // not sure why they return false in the example
+      // http://www.createjs.com/Demos/EaselJS/Game.html
+      case KEYCODE_LEFT:
+      case KEYCODE_A: leftHeld = true; return false;
+      case KEYCODE_UP:
+      case KEYCODE_W: upHeld = true; return false;
+      case KEYCODE_RIGHT:
+      case KEYCODE_D: rightHeld = true; return false;
+      case KEYCODE_DOWN:
+      case KEYCODE_S: downHeld = true; return false;
+    };
+
+  });
+  $(document).keyup(function(event){
+    // cross-browser compatibility
+    if (!event) { var event = window.event; }
+    switch(event.keyCode) {
+      // not sure why they return false in the example
+      // http://www.createjs.com/Demos/EaselJS/Game.html
+      case KEYCODE_LEFT:
+      case KEYCODE_A: leftHeld = false; break;
+      case KEYCODE_UP:
+      case KEYCODE_W: upHeld = false; break;
+      case KEYCODE_RIGHT:
+      case KEYCODE_D: rightHeld = false; break;
+      case KEYCODE_DOWN:
+      case KEYCODE_S: downHeld = false; break;
+    };
+  });
+}
+
 
 var initCanvas = function () {
-  canvas = document.getElementById('game');
+  canvas = $('#game')[0];
   context = canvas.getContext('2d');
   
   stage = new createjs.Stage(canvas);
@@ -52,40 +97,6 @@ var initGame = function () {
   createjs.Ticker.addListener(window);
 };
 
-var handleKeyDown = function (event) {
-  // cross-browser compatibility
-  if (!event) { var event = window.event; }
-  switch(event.keyCode) {
-    // not sure why they return false in the example
-    // http://www.createjs.com/Demos/EaselJS/Game.html
-    case KEYCODE_LEFT:
-    case KEYCODE_A: leftHeld = true; return false;
-    case KEYCODE_UP:
-    case KEYCODE_W: upHeld = true; return false;
-    case KEYCODE_RIGHT:
-    case KEYCODE_D: rightHeld = true; return false;
-    case KEYCODE_DOWN:
-    case KEYCODE_S: downHeld = true; return false;
-  };
-};
-
-var handleKeyUp= function (event) {
-  // cross-browser compatibility
-  if (!event) { var event = window.event; }
-  switch(event.keyCode) {
-    // not sure why they return false in the example
-    // http://www.createjs.com/Demos/EaselJS/Game.html
-    case KEYCODE_LEFT:
-    case KEYCODE_A: leftHeld = false; break;
-    case KEYCODE_UP:
-    case KEYCODE_W: upHeld = false; break;
-    case KEYCODE_RIGHT:
-    case KEYCODE_D: rightHeld = false; break;
-    case KEYCODE_DOWN:
-    case KEYCODE_S: downHeld = false; break;
-  };
-};
-
 var tick = function () {
   player.x -= Math.random();
   player.y -= Math.random();
@@ -100,3 +111,6 @@ var tick = function () {
     
   stage.update();
 }
+
+
+
