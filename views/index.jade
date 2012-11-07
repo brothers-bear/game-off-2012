@@ -1,0 +1,11 @@
+extends layout
+
+block scripts
+  script(src="http://code.createjs.com/easeljs-0.5.0.min.js")
+  script(src="http://code.createjs.com/preloadjs-0.2.0.min.js")
+  script(src="http://cdn.socket.io/stable/socket.io.js")
+  script(src="/javascripts/client.js")
+
+block content
+  h1= title
+  canvas#game
