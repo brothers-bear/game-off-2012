@@ -81,7 +81,7 @@ var initCanvas = function () {
   stage.mouseEventsEnabled = true;
 
   var manifest = [
-    {src: '/images/antigoliath.jpg', id: 'player'}
+    {src: '/images/pirate.png', id: 'player'}
   ];
 
   preloader = new createjs.PreloadJS();
