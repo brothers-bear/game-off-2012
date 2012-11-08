@@ -1,11 +1,13 @@
 extends layout
 
 block scripts
-  script(src="http://code.createjs.com/easeljs-0.5.0.min.js")
+  // Third party libraries
   script(src="/javascripts/jquery-1.8.2.min.js")
+  script(src="http://code.createjs.com/easeljs-0.5.0.min.js")
   script(src="http://code.createjs.com/preloadjs-0.2.0.min.js")
-  script(src="http://cdn.socket.io/stable/socket.io.js")
+  // Local libraries
   script(src="/javascripts/client.js")
+  script(src="/javascripts/Character.js")
 
 block content
   h1= title
