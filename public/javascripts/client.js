@@ -10,18 +10,23 @@ var KEYCODE_W = 87;     //useful keycode
 var KEYCODE_D = 68;     //useful keycode
 var KEYCODE_S = 83;     //useful keycode
 
-var MOVE_SPEED = 7;
+var TARGET_FPS = 60;
+var MOVE_SPEED = 2;
+var MOVE_ANIMATION_SPEED = 3 * MOVE_SPEED; // smaller = faster
 
 // DOM elements
 var canvas;
-var context;
 var stage;
+
+// animations
+var malePirateSpriteSheet;
 
 // Moving objects
 var player;
 
 // Keypress states
 var leftHeld, upHeld, rightHeld, downHeld;
+leftHeld = upHeld = rightHeld = downHeld = false;
 
 // Utilities
 var preloader;
@@ -40,21 +45,33 @@ $(document).ready(function () {
 function eventHandlers(){
   $(document).keydown(function (event) {
     // cross-browser compatibility
-    if (!event) { var event = window.event; }
+    if (!event) { event = window.event; }
     switch(event.keyCode) {
       // not sure why they return false in the example
       // http://www.createjs.com/Demos/EaselJS/Game.html
       case KEYCODE_LEFT:
-      case KEYCODE_A: leftHeld = true; return false;
+      case KEYCODE_A:
+        if (!leftHeld)
+          leftHeld = new Date().getTime();
+        break;
       case KEYCODE_UP:
-      case KEYCODE_W: upHeld = true; return false;
+      case KEYCODE_W:
+        if (!upHeld)
+          upHeld = new Date().getTime();
+        break;
       case KEYCODE_RIGHT:
-      case KEYCODE_D: rightHeld = true; return false;
+      case KEYCODE_D:
+        if (!rightHeld)
+          rightHeld = new Date().getTime();
+        break;
       case KEYCODE_DOWN:
-      case KEYCODE_S: downHeld = true; return false;
+      case KEYCODE_S:
+        if (!downHeld)
+          downHeld = new Date().getTime();
+        break;
     }
-
   });
+
   $(document).keyup(function (event) {
     // cross-browser compatibility
     if (!event) { event = window.event; }
@@ -75,13 +92,12 @@ function eventHandlers(){
 
 
 var initCanvas = function () {
-  context = canvas.getContext('2d');
-
   stage = new createjs.Stage(canvas);
+  stage.snapToPixelEnabled = true;
   stage.mouseEventsEnabled = true;
 
   var manifest = [
-    {src: '/images/pirate.png', id: 'player'}
+    {src: '/images/pirate_m2.png', id: 'player'}
   ];
 
   preloader = new createjs.PreloadJS();
@@ -91,25 +107,61 @@ var initCanvas = function () {
 
 
 var initGame = function () {
-  player = new createjs.Bitmap(preloader.getResult('player').result);
+  malePirateSpriteSheet= new createjs.SpriteSheet({
+    'images': ['/images/pirate_m2.png'],
+    'frames': { width: 32, height: 48, regX: 16, regY: 24 },
+    'animations': {
+      down: [0, 3, 'down', MOVE_ANIMATION_SPEED],
+      left: [4, 7, 'left', MOVE_ANIMATION_SPEED],
+      right: [8, 11, 'right', MOVE_ANIMATION_SPEED],
+      up: [12, 15, 'up', MOVE_ANIMATION_SPEED]
+    }
+  });
+
+  player = new createjs.BitmapAnimation(malePirateSpriteSheet);
+  player.gotoAndStop('down');
+  player.name = 'Male Pirate';
   player.x = canvas.width / 2;
   player.y = canvas.height / 2;
+  player.snapToPixel = true;
+
   stage.addChild(player);
-  stage.update();
 
   createjs.Ticker.addListener(window);
+  createjs.Ticker.useRAF = true;
+  createjs.Ticker.setFPS(TARGET_FPS);
+};
+
+// TODO: should really be refactored into player object
+var updateAnimation = function (player, direction) {
+  player.paused = false;
+  if (player.currentAnimation != direction)
+    player.gotoAndPlay(direction);
 };
 
 
 var tick = function () {
-  if (leftHeld)
-    player.x -= MOVE_SPEED;
-  if (upHeld)
-    player.y -= MOVE_SPEED;
-  if (rightHeld)
-    player.x += MOVE_SPEED;
-  if (downHeld)
-    player.y += MOVE_SPEED;
+  var mostRecentKey = Math.max(leftHeld, upHeld, rightHeld, downHeld);
+  switch (mostRecentKey) {
+    case leftHeld:
+      player.x -= MOVE_SPEED;
+      updateAnimation(player, 'left');
+      break;
+    case upHeld:
+      player.y -= MOVE_SPEED;
+      updateAnimation(player, 'up');
+      break;
+    case rightHeld:
+      player.x += MOVE_SPEED;
+      updateAnimation(player, 'right');
+      break;
+    case downHeld:
+      player.y += MOVE_SPEED;
+      updateAnimation(player, 'down');
+      break;
+    default:
+      player.paused = true;
+  }
 
   stage.update();
 };
