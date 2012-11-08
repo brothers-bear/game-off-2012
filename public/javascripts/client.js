@@ -70,6 +70,7 @@ function eventHandlers(){
           downHeld = new Date().getTime();
         break;
     }
+    event.preventDefault();
   });
 
   $(document).keyup(function (event) {
