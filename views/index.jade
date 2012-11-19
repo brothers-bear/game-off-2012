@@ -6,9 +6,17 @@ block scripts
   script(src="http://code.createjs.com/easeljs-0.5.0.min.js")
   script(src="http://code.createjs.com/preloadjs-0.2.0.min.js")
   // Local libraries
+  script(src='/socket.io/socket.io.js')
   script(src="/javascripts/client.js")
   script(src="/javascripts/Character.js")
+  script(src="/javascripts/sockets.js")
 
 block content
   h1= title
+  form(name="login_form", action="#", method="get")
+    | Username:
+    input(type="text", name="user")
+    | Password:
+    input(type="text", name="pwd")
+    input(type="submit", name="login", value="Submit")
   canvas#game

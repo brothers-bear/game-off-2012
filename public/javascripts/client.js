@@ -18,11 +18,13 @@ var MOVE_ANIMATION_SPEED = 3 * MOVE_SPEED; // smaller = faster
 var canvas;
 var stage;
 
+// Moving objects (all existing players)
+var players = [];
+
+var me;
+
 // animations
 var malePirateSpriteSheet;
-
-// Moving objects
-var player;
 
 // Keypress states
 var leftHeld, upHeld, rightHeld, downHeld;
@@ -32,14 +34,14 @@ leftHeld = upHeld = rightHeld = downHeld = false;
 var preloader;
 
 
-//on document load, create keyhandlers
-$(document).ready(function () {
+//on document load, create keyhandlers (same as $(document).ready
+$(function () {
   canvas = $('#game')[0];
   canvas.width = CANVAS_WIDTH;
   canvas.height = CANVAS_HEIGHT;
   initCanvas();
   eventHandlers();
- });
+});
 
 
 function eventHandlers(){
@@ -108,17 +110,21 @@ var initCanvas = function () {
 };
 
 
-var initGame = function () {
+
+// extrapolate player creation
+// should be called when player logs in and when other players join
+function createPlayer(name, isMe){
   // Create player character
   var img = preloader.getResult('pirate_m2').src;
   var width = 32;
   var height = 48;
   var moveAnimationSpeed = MOVE_ANIMATION_SPEED;
-  player = new Character(img, width, height, moveAnimationSpeed);
+  var player = new Character(img, width, height, moveAnimationSpeed);
 
   // set id properties
-  player.name = 'Me!';
-  player.isMe = true;
+  player.name = name;
+  player.isMe = isMe;
+  isMe && (me = player);
 
   // set render properties
   player.gotoAndStop('down');
@@ -129,9 +135,15 @@ var initGame = function () {
   player.yMin = 0 + height/2;
   player.yMax = canvas.height - height/2;
   player.snapToPixel = true;
+  players.push(player);
 
   stage.addChild(player);
+}
 
+
+
+
+var initGame = function () {
   createjs.Ticker.addListener(window);
   createjs.Ticker.useRAF = true;
   createjs.Ticker.setFPS(TARGET_FPS);
@@ -140,12 +152,14 @@ var initGame = function () {
 var tick = function () {
   var mostRecentKey = Math.max(leftHeld, upHeld, rightHeld, downHeld);
   switch (mostRecentKey) {
-    case leftHeld: player.vX = -MOVE_SPEED; break;
-    case upHeld: player.vY = -MOVE_SPEED; break;
-    case rightHeld: player.vX = MOVE_SPEED; break;
-    case downHeld: player.vY = MOVE_SPEED; break;
+    case leftHeld: me.vX = -MOVE_SPEED; break;
+    case upHeld: me.vY = -MOVE_SPEED; break;
+    case rightHeld: me.vX = MOVE_SPEED; break;
+    case downHeld: me.vY = MOVE_SPEED; break;
   }
   
-  player.tick();
+  for(i=0; i<players.length; i++){
+    players[i].tick();
+  }
   stage.update();
 };

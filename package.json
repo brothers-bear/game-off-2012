@@ -10,6 +10,9 @@
     "jade": "*",
     "js2coffee": "*",
     "connect-assets": "*",
-    "coffee-script": "*"
+    "coffee-script": "*",
+    "socket.io": "*",
+    "node-uuid": "*"
+    
   }
 }
