@@ -34,14 +34,12 @@ socket.on('loggedin', function(data) {
   }
 });
 
-socket.on('new_player', function(data) {
+/*  */
+socket.on('new player', function(data) {
   stage.addChild(createPlayer(data.name, false, data.userid));
 });
 
-
-
-
-
+/* received a message that anohter player moved */
 socket.on('client move', function(data){
   console.log('yeah i got the message');
   console.log(data.speed);

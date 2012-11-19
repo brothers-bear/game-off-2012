@@ -152,6 +152,7 @@ var initGame = function () {
   createjs.Ticker.useRAF = true;
   createjs.Ticker.setFPS(TARGET_FPS);
 };
+
 var tick = function () {
   var mostRecentKey = Math.max(leftHeld, upHeld, rightHeld, downHeld);
   switch (mostRecentKey) {

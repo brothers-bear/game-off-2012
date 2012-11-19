@@ -97,7 +97,7 @@ sio.sockets.on('connection', function (client) {
         userid: client.userid
     });
     // broadcast to all other sockets
-    client.broadcast.emit('new_player', { name: data.name, userid: client.userid });
+    client.broadcast.emit('new player', { name: data.name, userid: client.userid });
   });
 
 
