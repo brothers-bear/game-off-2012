@@ -38,6 +38,12 @@ app.get('/', routes.index);
 app.get('/users', user.list);
 
 
+// game info
+/* Players:
+ * 
+ */
+var players  = {};
+
 /* Socket.IO server set up. */
 
 //Express and socket.io can work together to serve the socket.io client files for you.
@@ -45,6 +51,7 @@ app.get('/users', user.list);
         
 //Create a socket.io instance using our express server
 var sio = io.listen(server);
+
 //Configure the socket.io connection settings. 
 //See http://socket.io/
 sio.configure(function (){
@@ -73,10 +80,48 @@ sio.sockets.on('connection', function (client) {
   }); // client.on disconnect
   client.on('login', function (data) {
     console.log('user:' + data.name + ' pwd:' + data.password); 
-    // for future logging in
-    client.emit('loggedin', { success: true });
+    // if successful, return player object back, and push a new player to list
+    var new_player = {
+      userid: client.userid,
+      name: data.name,
+      vX: 0,
+      vY: 0,
+      x: 400,
+      y: 300
+    }
+
+    players[client.userid] = new_player;
+    // for future logging in, check auth (success)
+    client.emit('loggedin', { 
+        success: true, 
+        userid: client.userid
+    });
     // broadcast to all other sockets
-    client.broadcast.emit('new_player', { name:data.name });
+    client.broadcast.emit('new_player', { name: data.name, userid: client.userid });
+  });
+
+
+  /* movement messages */
+  client.on('server move', function(data){
+
+    switch (data.dir) {
+      case 'L': 
+        players[client.userid].vX = -data.speed;
+        break;
+      case 'U': 
+        players[client.userid].vY = -data.speed;
+        break;
+      case 'R': 
+        players[client.userid].vX = data.speed;
+        break;
+      case 'D': 
+        players[client.userid].vY = data.speed;
+        break;
+    }
+    client.broadcast.emit('client move', { userid: client.userid, speed: data.speed, dir: data.dir});    
+
+    
+
   });
   
 }); //sio.sockets.on connection

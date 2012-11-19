@@ -19,8 +19,9 @@ var canvas;
 var stage;
 
 // Moving objects (all existing players)
-var players = [];
+var players = {};
 
+// object of you
 var me;
 
 // animations
@@ -113,7 +114,7 @@ var initCanvas = function () {
 
 // extrapolate player creation
 // should be called when player logs in and when other players join
-function createPlayer(name, isMe){
+function createPlayer(name, isMe, uid){
   // Create player character
   var img = preloader.getResult('pirate_m2').src;
   var width = 32;
@@ -124,7 +125,7 @@ function createPlayer(name, isMe){
   // set id properties
   player.name = name;
   player.isMe = isMe;
-  isMe && (me = player);
+  player.uid = uid;
 
   // set render properties
   player.gotoAndStop('down');
@@ -135,9 +136,12 @@ function createPlayer(name, isMe){
   player.yMin = 0 + height/2;
   player.yMax = canvas.height - height/2;
   player.snapToPixel = true;
-  players.push(player);
+  players[uid] = player;
+  console.log("YEAHHAHAHAHAHAHAHAHA" + uid);
+  console.log(player);
 
-  stage.addChild(player);
+  isMe && (me = player);
+  return player;
 }
 
 
@@ -148,17 +152,29 @@ var initGame = function () {
   createjs.Ticker.useRAF = true;
   createjs.Ticker.setFPS(TARGET_FPS);
 };
-
 var tick = function () {
   var mostRecentKey = Math.max(leftHeld, upHeld, rightHeld, downHeld);
   switch (mostRecentKey) {
-    case leftHeld: me.vX = -MOVE_SPEED; break;
-    case upHeld: me.vY = -MOVE_SPEED; break;
-    case rightHeld: me.vX = MOVE_SPEED; break;
-    case downHeld: me.vY = MOVE_SPEED; break;
+    case leftHeld: 
+      me.vX = -MOVE_SPEED; 
+      socket.emit("server move", { dir: 'L', speed: MOVE_SPEED})
+      console.log("YEAH MAN");
+      break;
+    case upHeld: 
+      me.vY = -MOVE_SPEED; 
+      socket.emit("server move", { dir: 'U', speed: MOVE_SPEED})
+      break;
+    case rightHeld: 
+      me.vX = MOVE_SPEED; 
+      socket.emit("server move", { dir: 'R', speed: MOVE_SPEED})
+      break;
+    case downHeld: 
+      socket.emit("server move", { dir: 'D', speed: MOVE_SPEED})
+      me.vY = MOVE_SPEED; 
+      break;
   }
   
-  for(i=0; i<players.length; i++){
+  for(i in players){
     players[i].tick();
   }
   stage.update();
