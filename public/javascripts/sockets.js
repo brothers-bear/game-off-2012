@@ -41,6 +41,7 @@ socket.on('new player', function(data) {
 
 // takes in a player object given by the server, and applies it to the corresponding player in players
 function convertPlayer(server_player){
+  // we iterate over our loop, so if it doesnt exist on the server, we remove it
   for(i in server_player){
     players[server_player.userid][i] = server_player[i];
   }
@@ -50,6 +51,11 @@ function convertPlayer(server_player){
 /* received a message that anohter player moved */
 socket.on('client move', function(data){
   convertPlayer(data.player);
+});
+
+socket.on('player disconnect', function(data){
+  stage.removeChild(players[data.userid]);
+  delete players[data.userid];
 });
 
 

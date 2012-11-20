@@ -81,6 +81,9 @@ sio.sockets.on('connection', function (client) {
   client.on('disconnect', function () {
     //Useful to know when someone disconnects
     console.log('\t socket.io:: client disconnected ' + client.userid );
+    // remove the player from the array
+    delete players[client.userid];
+    client.broadcast.emit('player disconnect', { userid: client.userid });
   }); // client.on disconnect
   client.on('login', function (data) {
     console.log('user:' + data.name + ' pwd:' + data.password); 
