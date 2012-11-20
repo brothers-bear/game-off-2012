@@ -132,8 +132,6 @@ sio.sockets.on('connection', function (client) {
 
   // receives the player id that stops, updates their vx and vy
   client.on('server stop', function(data){
-    console.log(data.userid);
-    console.log(players[data.userid]);
     players[data.userid].vX = 0;
     players[data.userid].vY = 0;
   });
@@ -148,8 +146,6 @@ function gameTick(){
     p.y = p.y + p.vY;
     // redo x and y so it isn't beyond boundaries
 
-    console.log("x pos:" + p.x);
-    console.log("Y pos:" + p.y);
   }
 }
 

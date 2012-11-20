@@ -5,7 +5,6 @@ var socket = io.connect('/');
 $(function(){
   $('input[name=login]').click(function(e){
     e.preventDefault();
-    console.log("yeah!");
     socket.emit('login', { 
       name: $('input[name=user]').val(), 
       password: $('input[name=pwd]').val(),
@@ -19,8 +18,6 @@ socket.on('onconnected', function( data ) {
   console.log( 'Connected successfully to the socket.io server. My server side ID is ' + data.id );
   for(i in data.players){
     p = data.players[i];
-    console.log("this is sparta!!")
-    console.log(p);
     stage.addChild(createPlayer("test", false, p.userid, p.x, p.y, p.vX, p.vY));    
   }
 
@@ -28,16 +25,11 @@ socket.on('onconnected', function( data ) {
 });
 
 socket.on('loggedin', function(data) {
-  console.log('LOGGED IN');
-  console.log(data.success);
-  console.log(data.userid);
-  console.log('end');
   if(data.success === true) {
     //create player
     me = createPlayer($('input[name=user]').val(), true, data.userid);
     stage.addChild(me);
-    console.log('yes its here:');
-    console.log(me);
+    stage.addChild(createItem(300,400,"unique"));
   }
 });
 
@@ -57,8 +49,6 @@ function convertPlayer(server_player){
 
 /* received a message that anohter player moved */
 socket.on('client move', function(data){
-  console.log('yeah i got the message');
-  console.log(data.player);
   convertPlayer(data.player);
 });
 

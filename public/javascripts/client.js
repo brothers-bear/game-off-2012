@@ -20,6 +20,7 @@ var stage;
 
 // Moving objects (all existing players)
 var players = {};
+var items = {}
 
 // object of you
 var me;
@@ -114,7 +115,8 @@ var initCanvas = function () {
   stage.mouseEventsEnabled = true;
 
   var manifest = [
-    {src: '/images/pirate_m2.png', id: 'pirate_m2'}
+    {src: '/images/pirate_m2.png', id: 'pirate_m2'},
+    {src: '/images/gem.png', id: 'gem'}
   ];
 
   preloader = new createjs.PreloadJS();
@@ -123,6 +125,23 @@ var initCanvas = function () {
 };
 
 
+function createItem(x, y, id){
+  var img = preloader.getResult('gem').src;
+  var width = 16;
+  var height = 16;
+  var moveAnimationSpeed = MOVE_ANIMATION_SPEED;
+  var item = new Item(img, width, height, moveAnimationSpeed);
+
+  item.x = x;
+  item.y = y;
+  item.id = id;
+  item.gotoAndStop('down');
+  item.snapToPixel = true;
+
+  items[id] = item; 
+
+  return item;
+}
 
 // extrapolate player creation
 // should be called when player logs in and when other players join
@@ -153,8 +172,6 @@ function createPlayer(name, isMe, userid, p_x, p_y, p_vX, p_vY){
 
   player.snapToPixel = true;
   players[userid] = player;
-  console.log("YEAHHAHAHAHAHAHAHAHA" + userid);
-  console.log(player);
 
   isMe && (me = player);
   return player;
@@ -167,7 +184,6 @@ var initGame = function () {
   createjs.Ticker.addListener(window);
   createjs.Ticker.useRAF = true;
   createjs.Ticker.setFPS(TARGET_FPS);
-  console.log("TICKER TIME"+createjs.Ticker.getInterval());
 };
 
 
@@ -178,7 +194,6 @@ var tick = function () {
     case leftHeld: 
       me.vX = -MOVE_SPEED; 
       socket.emit("server move", { dir: 'L', speed: MOVE_SPEED})
-      console.log("YEAH MAN");
       break;
     case upHeld: 
       me.vY = -MOVE_SPEED; 
@@ -196,6 +211,9 @@ var tick = function () {
   
   for(i in players){
     players[i].tick();
+  }
+  for(i in items){
+    items[i].tick();
   }
   stage.update();
 };
