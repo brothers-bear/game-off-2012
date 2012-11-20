@@ -84,13 +84,25 @@ function eventHandlers(){
     switch(event.keyCode) {
       // on key up, reset the flag
       case KEYCODE_LEFT:
-      case KEYCODE_A: leftHeld = false; break;
+      case KEYCODE_A: 
+        leftHeld = false; 
+        socket.emit('server stop', {userid: me.userid});
+        break;
       case KEYCODE_UP:
-      case KEYCODE_W: upHeld = false; break;
+      case KEYCODE_W: 
+        upHeld = false; 
+        socket.emit('server stop', {userid: me.userid});
+        break;
       case KEYCODE_RIGHT:
-      case KEYCODE_D: rightHeld = false; break;
+      case KEYCODE_D: 
+        rightHeld = false; 
+        socket.emit('server stop', {userid: me.userid});
+        break;
       case KEYCODE_DOWN:
-      case KEYCODE_S: downHeld = false; break;
+      case KEYCODE_S: 
+        downHeld = false; 
+        socket.emit('server stop', {userid: me.userid});
+        break;
     }
   });
 }
@@ -114,7 +126,7 @@ var initCanvas = function () {
 
 // extrapolate player creation
 // should be called when player logs in and when other players join
-function createPlayer(name, isMe, uid){
+function createPlayer(name, isMe, userid, p_x, p_y, p_vX, p_vY){
   // Create player character
   var img = preloader.getResult('pirate_m2').src;
   var width = 32;
@@ -125,19 +137,23 @@ function createPlayer(name, isMe, uid){
   // set id properties
   player.name = name;
   player.isMe = isMe;
-  player.uid = uid;
+  player.userid = userid;
 
   // set render properties
   player.gotoAndStop('down');
-  player.x = canvas.width/2;
+  player.x = p_x == undefined ? canvas.width/2 : p_x ;
   player.xMin = 0 + width/2;
   player.xMax = canvas.width - width/2;
-  player.y = canvas.height / 2;
+  player.y = p_y == undefined ? canvas.height / 2 : p_y;
   player.yMin = 0 + height/2;
   player.yMax = canvas.height - height/2;
+
+  player.vY = p_vY == undefined ? 0 : p_vY;
+  player.vX = p_vX == undefined ? 0 : p_vX;
+
   player.snapToPixel = true;
-  players[uid] = player;
-  console.log("YEAHHAHAHAHAHAHAHAHA" + uid);
+  players[userid] = player;
+  console.log("YEAHHAHAHAHAHAHAHAHA" + userid);
   console.log(player);
 
   isMe && (me = player);
@@ -151,7 +167,10 @@ var initGame = function () {
   createjs.Ticker.addListener(window);
   createjs.Ticker.useRAF = true;
   createjs.Ticker.setFPS(TARGET_FPS);
+  console.log("TICKER TIME"+createjs.Ticker.getInterval());
 };
+
+
 
 var tick = function () {
   var mostRecentKey = Math.max(leftHeld, upHeld, rightHeld, downHeld);

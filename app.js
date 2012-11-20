@@ -42,7 +42,8 @@ app.get('/users', user.list);
 /* Players:
  * 
  */
-var players  = {};
+var players = {};
+var FPS = 60;
 
 /* Socket.IO server set up. */
 
@@ -70,7 +71,10 @@ sio.sockets.on('connection', function (client) {
   //and store this on their socket/connection
   client.userid = UUID();
   //tell the player they connected, giving them their id
-  client.emit('onconnected', { id: client.userid } );
+  client.emit('onconnected', { 
+    id: client.userid,
+    players: players
+  } );
   //Useful to know when someone connects
   console.log('\t socket.io:: player ' + client.userid + ' connected');
   //When this client disconnects
@@ -94,7 +98,7 @@ sio.sockets.on('connection', function (client) {
     // for future logging in, check auth (success)
     client.emit('loggedin', { 
         success: true, 
-        userid: client.userid
+        userid: client.userid,
     });
     // broadcast to all other sockets
     client.broadcast.emit('new player', { name: data.name, userid: client.userid });
@@ -118,13 +122,40 @@ sio.sockets.on('connection', function (client) {
         players[client.userid].vY = data.speed;
         break;
     }
-    client.broadcast.emit('client move', { userid: client.userid, speed: data.speed, dir: data.dir});    
+    // emit to all sockets (including client self) so that client's side is made sure to be the same
+    sio.sockets.emit('client move', { player: players[client.userid] });    
+
 
     
 
   });
+
+  // receives the player id that stops, updates their vx and vy
+  client.on('server stop', function(data){
+    console.log(data.userid);
+    console.log(players[data.userid]);
+    players[data.userid].vX = 0;
+    players[data.userid].vY = 0;
+  });
   
 }); //sio.sockets.on connection
+
+//update movement
+function gameTick(){
+  for(i in players) {
+    p = players[i];
+    p.x = p.x + p.vX;
+    p.y = p.y + p.vY;
+    // redo x and y so it isn't beyond boundaries
+
+    console.log("x pos:" + p.x);
+    console.log("Y pos:" + p.y);
+  }
+}
+
+setInterval(gameTick, 1000/FPS); 
+
+
 
 
 // for debugging, returns files

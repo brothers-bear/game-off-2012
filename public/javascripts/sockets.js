@@ -17,6 +17,13 @@ $(function(){
 socket.on('onconnected', function( data ) {
   //Note that the data is the object we sent from the server, as is. So we can assume its id exists. 
   console.log( 'Connected successfully to the socket.io server. My server side ID is ' + data.id );
+  for(i in data.players){
+    p = data.players[i];
+    console.log("this is sparta!!")
+    console.log(p);
+    stage.addChild(createPlayer("test", false, p.userid, p.x, p.y, p.vX, p.vY));    
+  }
+
   //create the character, just dont add it in
 });
 
@@ -39,25 +46,20 @@ socket.on('new player', function(data) {
   stage.addChild(createPlayer(data.name, false, data.userid));
 });
 
+
+// takes in a player object given by the server, and applies it to the corresponding player in players
+function convertPlayer(server_player){
+  for(i in server_player){
+    players[server_player.userid][i] = server_player[i];
+  }
+}
+
+
 /* received a message that anohter player moved */
 socket.on('client move', function(data){
   console.log('yeah i got the message');
-  console.log(data.speed);
-
-  switch (data.dir) {
-    case 'L': 
-      players[data.userid].vX = -data.speed;
-      break;
-    case 'U': 
-      players[data.userid].vY = -data.speed;
-      break;
-    case 'R': 
-      players[data.userid].vX = data.speed;
-      break;
-    case 'D': 
-      players[data.userid].vY = data.speed;
-      break;
-  }
+  console.log(data.player);
+  convertPlayer(data.player);
 });
 
 
