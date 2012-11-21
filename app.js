@@ -148,8 +148,8 @@ function gameTick(){
     p.x = p.x + p.vX;
     p.y = p.y + p.vY;
     // redo x and y so it isn't beyond boundaries
-
   }
+  // check for collision
 }
 
 setInterval(gameTick, 1000/FPS); 

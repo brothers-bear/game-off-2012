@@ -47,7 +47,7 @@ $(function () {
 
 
 function eventHandlers(){
-  $(document).keydown(function (event) {
+  $('#game').keydown(function (event) {
     // cross-browser compatibility
     if (!event) { event = window.event; }
     switch(event.keyCode) {
