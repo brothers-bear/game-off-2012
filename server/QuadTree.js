@@ -178,9 +178,31 @@ QuadTree.prototype.insert = function(player) {
 
 
 QuadTree.prototype.remove = function(userid) {
+  console.log(this);
+
+  var remove_helper = function(userid, node){
+    console.log('inside')
+    console.log(node)
+    if(node.children === {})
+      return;
+    for(var i in node.players) {
+      if(node.players[i].userid === userid){
+        delete node.players[i];
+        return true;
+      }
+    }
+    for(var i in node.children) {
+      if(remove_helper(userid,node.children[i])){
+        return true;
+      }
+    }
+    return false;
+  }
+  remove_helper(userid, this.root);
 
 }
 
+/*
 // for testing
 var q = new QuadTree({left:0, right:400, top: 0, bottom: 600}, 3, 4)
 var new_player1 = {
@@ -215,13 +237,12 @@ var new_player4 = {
         x: 100,
         y: 100 
       }   
-/*
 q.insert(new_player1);
 q.insert(new_player2);
 q.insert(new_player3);
 q.insert(new_player4);
+q.insert(new_player1);
+q.insert(new_player1);
+q.insert(new_player1);
+q.insert(new_player1);
 */
-q.insert(new_player1);
-q.insert(new_player1);
-q.insert(new_player1);
-q.insert(new_player1);
