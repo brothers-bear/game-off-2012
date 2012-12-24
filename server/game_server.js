@@ -1,9 +1,9 @@
-
 var io  = require('socket.io')
   , UUID = require('node-uuid')
   ;
 exports.start = function(server){
-  console.log('hi');
+  var sio = io.listen(server);
+  console.log('Server started!');
 
 
   // game info
@@ -11,25 +11,18 @@ exports.start = function(server){
    * 
    */
   var players = {};
+  var items = {};
 
-      var new_player = {
-        userid: client.userid,
-        name: data.name,
-        vX: 0,
-        vY: 0,
-        x: 400,
-        y: 300
-      }
 
   var FPS = 60;
-
   /* Socket.IO server set up. */
 
   //Express and socket.io can work together to serve the socket.io client files for you.
   //This way, when the client requests '/socket.io/' files, socket.io determines what the client needs.
           
   //Create a socket.io instance using our express server
-  var sio = io.listen(server);
+
+  createServerItem(150,150,0,16,16,"power");
 
   //Configure the socket.io connection settings. 
   //See http://socket.io/
@@ -44,6 +37,7 @@ exports.start = function(server){
   //So we can send that client a unique ID we use so we can 
   //maintain the list of players.
   sio.sockets.on('connection', function (client) {
+    
     //Generate a new UUID, looks something like 
     //5b2ca132-64bd-4513-99da-90e838ca47d1
     //and store this on their socket/connection
@@ -51,7 +45,8 @@ exports.start = function(server){
     //tell the player they connected, giving them their id
     client.emit('onconnected', { 
       id: client.userid,
-      players: players
+      players: players,
+      items: items
     } );
     //Useful to know when someone connects
     console.log('\t socket.io:: player ' + client.userid + ' connected');
@@ -64,6 +59,14 @@ exports.start = function(server){
       client.broadcast.emit('player disconnect', { userid: client.userid });
     }); // client.on disconnect
     client.on('login', function (data) {
+      var new_player = {
+        userid: client.userid,
+        name: data.name,
+        vX: 0,
+        vY: 0,
+        x: 400,
+        y: 300
+      }
       console.log('user:' + data.name + ' pwd:' + data.password); 
       // if successful, return player object back, and push a new player to list
       var new_player = {
@@ -127,10 +130,32 @@ exports.start = function(server){
       p.y = p.y + p.vY;
       // redo x and y so it isn't beyond boundaries
     }
+    for(i in items) {
+      item = items[i];
+      item.x = item.x;
+      item.y = item.y;
+      // redo x and y so it isn't beyond boundaries
+    }
     // check for collision: Quadtree implementation
     
   }
 
   setInterval(gameTick, 1000/FPS); 
 
+  function createServerItem(x, y, id, width, height, type){
+    items[id] = {
+      x: x,
+      y: y,
+      id: id,
+      width: width,
+      height: height,
+      type: type
+    }
+    console.log("gets called");
+    sio.sockets.emit('create item', { item: items[id]})
+    return items[id];
+  }
+  
+
 }
+

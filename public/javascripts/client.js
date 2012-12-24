@@ -13,6 +13,10 @@ var KEYCODE_S = 83;     //useful keycode
 var TARGET_FPS = 60;
 var MOVE_SPEED = 2;
 var MOVE_ANIMATION_SPEED = 3 * MOVE_SPEED; // smaller = faster
+// has connected to the server
+var connected;
+// for the initial loading TODO: REFACTOR!
+var init_data;
 
 // DOM elements
 var canvas;
@@ -115,20 +119,20 @@ var initCanvas = function () {
   stage.mouseEventsEnabled = true;
 
   var manifest = [
+    {src: '/images/gem.png', id: 'gem'},
     {src: '/images/pirate_m2.png', id: 'pirate_m2'},
-    {src: '/images/gem.png', id: 'gem'}
   ];
 
   preloader = new createjs.PreloadJS();
-  preloader.onComplete = initGame;
   preloader.loadManifest(manifest);
+  preloader.onComplete = initGame;
 };
 
 
-function createItem(x, y, id){
+function createItem(x, y, id, width, height, type){
+  // determine img by type
+  console.log(preloader.getResult('gem'))
   var img = preloader.getResult('gem').src;
-  var width = 16;
-  var height = 16;
   var moveAnimationSpeed = MOVE_ANIMATION_SPEED;
   var item = new Item(img, width, height, moveAnimationSpeed);
 
@@ -137,6 +141,7 @@ function createItem(x, y, id){
   item.id = id;
   item.gotoAndStop('down');
   item.snapToPixel = true;
+  item.type = type;
 
   items[id] = item; 
 
@@ -184,6 +189,17 @@ var initGame = function () {
   createjs.Ticker.addListener(window);
   createjs.Ticker.useRAF = true;
   createjs.Ticker.setFPS(TARGET_FPS);
+
+  if(connected){
+    for(i in init_data.players){
+      p = init_data.players[i];
+      stage.addChild(createPlayer("test", false, p.userid, p.x, p.y, p.vX, p.vY));    
+    }
+    for(i in init_data.items){
+      stage.addChild(convertItem(init_data.items[i]));
+    }
+
+  }
 };
 
 
