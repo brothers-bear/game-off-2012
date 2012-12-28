@@ -1,6 +1,13 @@
 var io  = require('socket.io')
   , UUID = require('node-uuid')
+  , QuadTree = require('./QuadTree.js').QuadTree
+  , _ = require('underscore') 
   ;
+
+var CANVAS_WIDTH = 800;
+var CANVAS_HEIGHT = 600;
+
+
 exports.start = function(server){
   var sio = io.listen(server);
   console.log('Server started!');
@@ -13,6 +20,8 @@ exports.start = function(server){
   var players = {};
   var items = {};
 
+  var map = new QuadTree({left:0, right:CANVAS_WIDTH, top: 0, bottom: CANVAS_HEIGHT}, 3, 4)
+  
 
   var FPS = 60;
   /* Socket.IO server set up. */
@@ -22,7 +31,7 @@ exports.start = function(server){
           
   //Create a socket.io instance using our express server
 
-  createServerItem(150,150,0,16,16,"power");
+  createServerItem(Math.random()*CANVAS_WIDTH,Math.random()*CANVAS_HEIGHT,0,16,16,"power");
 
   //Configure the socket.io connection settings. 
   //See http://socket.io/
@@ -59,14 +68,6 @@ exports.start = function(server){
       client.broadcast.emit('player disconnect', { userid: client.userid });
     }); // client.on disconnect
     client.on('login', function (data) {
-      var new_player = {
-        userid: client.userid,
-        name: data.name,
-        vX: 0,
-        vY: 0,
-        x: 400,
-        y: 300
-      }
       console.log('user:' + data.name + ' pwd:' + data.password); 
       // if successful, return player object back, and push a new player to list
       var new_player = {
@@ -75,8 +76,16 @@ exports.start = function(server){
         vX: 0,
         vY: 0,
         x: 400,
-        y: 300
+        y: 300,
+        height: 48,
+        width: 20,    // TODO: Refactor this into the createPlayer method (HARDCODED ATM)
+        score: 0
       }
+
+      map.insert(new_player);
+      console.log(map)
+      console.log(map)
+      //map.printTree();
 
       players[client.userid] = new_player;
       // for future logging in, check auth (success)
@@ -125,9 +134,40 @@ exports.start = function(server){
   //update movement
   function gameTick(){
     for(i in players) {
+      console.log("is it colliding?")
+      console.log("this is colliding: " + map.colliding(players[i]))
+      
       p = players[i];
       p.x = p.x + p.vX;
       p.y = p.y + p.vY;
+      var collision = map.colliding(players[i]);
+      
+
+      if(collision){
+        // if there's an item collision 
+        
+        
+        if(typeof collision.itemid !== 'undefined') {
+          // collected an item!
+          map.remove(collision)
+          delete items[collision.itemid];
+          sio.sockets.emit('item pickup', {
+            itemid: collision.itemid, 
+            userid: p.userid
+          })
+          p.score++;
+          // generate a new one
+          createServerItem(Math.random()*CANVAS_WIDTH,Math.random()*CANVAS_HEIGHT,0,16,16,"power");
+        }
+        // if there are collisions, don't move this guy, but move him backwards to get out of the collision
+        else {
+          p.x = p.x - p.vX;
+          p.y = p.y - p.vY;
+
+
+        }
+        
+      }
       // redo x and y so it isn't beyond boundaries
     }
     for(i in items) {
@@ -138,6 +178,17 @@ exports.start = function(server){
     }
     // check for collision: Quadtree implementation
     
+    if(map.root.players.length > 0){
+      console.log('yes!')
+      console.log(map.root.players[0])
+      console.log(map.root.players[1])
+    }
+    //console.log(map)
+    map.clear();
+    //console.log(map)
+    _.each(players, function(item){ map.insert(item) })
+    _.each(items, function(item){ map.insert(item) })
+    
   }
 
   setInterval(gameTick, 1000/FPS); 
@@ -146,7 +197,7 @@ exports.start = function(server){
     items[id] = {
       x: x,
       y: y,
-      id: id,
+      itemid: id,
       width: width,
       height: height,
       type: type

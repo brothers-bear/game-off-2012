@@ -1,15 +1,13 @@
-
+var _ = require('underscore');
 
 // QuadTree used for collision detection
-var QuadTreeNode = function(bounds, depth, maxChildren, maxDepth){
+var QuadTreeNode = function(bounds, depth, maxChildren, maxDepth) {
   this.children = {}
 
-/*  {*/
     //nw: undefined,
     //ne: undefined,
     //sw: undefined,
     //se: undefined
-  /*}*/
 
   this.bounds = bounds;
   this.depth = depth;
@@ -18,46 +16,74 @@ var QuadTreeNode = function(bounds, depth, maxChildren, maxDepth){
   this.maxDepth = maxDepth;
 }
 
+QuadTreeNode.prototype.clear = function(){
+  this.players = [];
+  _.each(this.children, function(item){
+    item.clear();
+  });
+  this.children = {};
+}
+
 
 var QuadTree = function(bounds, maxChildren, maxDepth) {
   this.maxChildren = maxChildren;
   this.maxDepth = maxDepth;
   this.bounds = bounds;
   this.root = new QuadTreeNode(bounds, 0, maxChildren, maxDepth);
-  
+}
+
+QuadTree.prototype.clear = function(userid) {
+  this.root.clear();
 }
 
 function testBounds() {
 
 }
 
+QuadTree.prototype.colliding = function(player) {
+  var quad = this.findQuadrant(player, this.root);
+  return _.find(quad.players, function(q){
+    // if its not the same, check if they're colliding
+    // TODO: Should refactor our players, incorporate this
+    if(q === player) return false;
+    if (q.x + q.width/2 < player.x - player.width/2) return false; // a is left of b
+    if (q.x - q.width/2 > player.x + player.width/2) return false; // a is right of b
+    if (q.y + q.height/2 < player.y - player.height/2) return false; // a is above b
+    if (q.y - q.height/2 > player.y + player.height/2) return false; // a is below b
+    return true; // boxes overlap
+  });
+
+}
+
 QuadTree.prototype.findQuadrant = function(player, parent) {
-  console.log('inside find quadrant');
-  console.log(player);
-  console.log(parent.children);
+  //console.log('inside find quadrant');
+  //console.log(player);
+  //console.log(parent.children);
 
   // this is the correct node (it has no nw child, therefore it has no children -- crappy check, but it should work for now. TODO: later)
   if(parent.children.nw === undefined) {
-    console.log("did not have any children");
+    //console.log("did not have any children");
     return parent;
   }
 
   for(var i in parent.children) {
     var child = parent.children[i];
-      console.log("child:");
-      console.log(child);
-      console.log("player:")
-      console.log(player);
+      /*
+       *console.log("child:");
+       *console.log(child);
+       *console.log("player:")
+       *console.log(player);
+       */
     // if you have children, then you have to go further down. Check which child to traverse to. WRITE RECURSIVELY
     if(player.x >= child.bounds.left && player.x <= child.bounds.right && player.y >= child.bounds.top && player.y <= child.bounds.bottom) {
       //call it on the child
       return this.findQuadrant(player, child);
     }
   }
-      console.log("shouldn't reach here");
+      //console.log("shouldn't reach here");
 }
 
-
+// for testing
 QuadTree.prototype.printTree = function() {
   var helper = function(node) {
     console.log("\nMax Children: " + node.maxChildren);
@@ -76,32 +102,40 @@ QuadTree.prototype.printTree = function() {
   }
   helper(this.root);
 }
-  
+// TODO: refactor into one methods
+QuadTree.prototype.insertArray = function(players, map) {
+  //_.each(players, map.insert);
+}
+ 
 QuadTree.prototype.insert = function(player) {
 
-  console.log(this);
-  console.log(this.prototype);
+  /*
+   *console.log(this);
+   *console.log(this.prototype);
+   */
   var parent = this.findQuadrant(player, this.root);
-  console.log(parent);
-  console.log(this.root);
-
-  console.log(player);
-
-  console.log("Testing children");
-  console.log(parent);
-  console.log(parent.maxChildren);
+/*
+ *  console.log(parent);
+ *  console.log(this.root);
+ *
+ *  console.log(player);
+ *
+ *  console.log("Testing children");
+ *  console.log(parent);
+ *  console.log(parent.maxChildren);
+ */
   // if parent has less than the max amount of children, then insert as a leaf, returns the result node
   // OR, if parent is already at max depth
   if (parent.players.length < parent.maxChildren || parent.depth === parent.maxDepth) {
-    console.log("Should push to current node now");
-    console.log("Current node: ");
-    console.log(parent);
+    //console.log("Should push to current node now");
+    //console.log("Current node: ");
+    //console.log(parent);
     parent.players.push(player);
     return parent;
   }
   // otherwise you need to create four new children nodes, and move players around into new
   else {
-    console.log("Creating new children");
+    //console.log("Creating new children");
     var player_bounds = {
       left: player.x,
       right: player.x, 
@@ -122,28 +156,28 @@ QuadTree.prototype.insert = function(player) {
                                  parent.depth + 1, parent.maxChildren, parent.maxDepth);
 
     // go through each player in current node, and assign it to the correct child
-    console.log("HERE");
-    console.log(parent.players);
+    //console.log("HERE");
+    //console.log(parent.players);
     for(var i in parent.players){
       var p = parent.players[i];
       if(p.x >= 0 && p.x < y_axis && p.y >= 0 && p.y < x_axis) {
         parent.children.nw.players.push(p);
-        console.log("SHOULD DELETE");
+        //console.log("SHOULD DELETE");
       }
       else if(p.x >= 0 && p.x < y_axis && p.y >= x_axis && p.y <= p_bounds.bottom) {
         parent.children.sw.players.push(p);
-        console.log("SHOULD DELETE");
+        //console.log("SHOULD DELETE");
       }
       else if(p.x >= y_axis && p.x < p_bounds.right && p.y >= 0 && p.y < y_axis) {
         parent.children.ne.players.push(p);
-        console.log("SHOULD DELETE");
+        //console.log("SHOULD DELETE");
       }
       else if(p.x >= y_axis && p.x < p_bounds.right && p.y >= x_axis && p.y <= p_bounds.bottom) {
         parent.children.se.players.push(p);
-        console.log("SHOULD DELETE");
+        //console.log("SHOULD DELETE");
       }
       else{
-        console.log("Error. Couldn't update children node. ERROR!");
+        //console.log("Error. Couldn't update children node. ERROR!");
       }
     }
     parent.players = []; // clear children in parent node
@@ -177,30 +211,30 @@ QuadTree.prototype.insert = function(player) {
 }
 
 
-QuadTree.prototype.remove = function(userid) {
-  console.log(this);
+QuadTree.prototype.remove = function(candidate) {
+  //console.log(this);
 
-  var remove_helper = function(userid, node){
-    console.log('inside')
-    console.log(node)
+  var remove_helper = function(candidate, node){
+    //console.log('inside')
+    //console.log(node)
     if(node.children === {})
       return;
     for(var i in node.players) {
-      if(node.players[i].userid === userid){
+      if(node.players[i] === candidate){
         delete node.players[i];
         return true;
       }
     }
     for(var i in node.children) {
-      if(remove_helper(userid,node.children[i])){
+      if(remove_helper(candidate,node.children[i])){
         return true;
       }
     }
     return false;
   }
-  remove_helper(userid, this.root);
-
+  remove_helper(candidate, this.root);
 }
+
 
 /*
 // for testing
@@ -246,3 +280,6 @@ q.insert(new_player1);
 q.insert(new_player1);
 q.insert(new_player1);
 */
+
+// export for external use
+exports.QuadTree = QuadTree;

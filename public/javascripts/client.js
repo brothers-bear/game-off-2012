@@ -129,62 +129,6 @@ var initCanvas = function () {
 };
 
 
-function createItem(x, y, id, width, height, type){
-  // determine img by type
-  console.log(preloader.getResult('gem'))
-  var img = preloader.getResult('gem').src;
-  var moveAnimationSpeed = MOVE_ANIMATION_SPEED;
-  var item = new Item(img, width, height, moveAnimationSpeed);
-
-  item.x = x;
-  item.y = y;
-  item.id = id;
-  item.gotoAndStop('down');
-  item.snapToPixel = true;
-  item.type = type;
-
-  items[id] = item; 
-
-  return item;
-}
-
-// extrapolate player creation
-// should be called when player logs in and when other players join
-function createPlayer(name, isMe, userid, p_x, p_y, p_vX, p_vY){
-  // Create player character
-  var img = preloader.getResult('pirate_m2').src;
-  var width = 32;
-  var height = 48;
-  var moveAnimationSpeed = MOVE_ANIMATION_SPEED;
-  var player = new Character(img, width, height, moveAnimationSpeed);
-
-  // set id properties
-  player.name = name;
-  player.isMe = isMe;
-  player.userid = userid;
-
-  // set render properties
-  player.gotoAndStop('down');
-  player.x = p_x == undefined ? canvas.width/2 : p_x ;
-  player.xMin = 0 + width/2;
-  player.xMax = canvas.width - width/2;
-  player.y = p_y == undefined ? canvas.height / 2 : p_y;
-  player.yMin = 0 + height/2;
-  player.yMax = canvas.height - height/2;
-
-  player.vY = p_vY == undefined ? 0 : p_vY;
-  player.vX = p_vX == undefined ? 0 : p_vX;
-
-  player.snapToPixel = true;
-  players[userid] = player;
-
-  isMe && (me = player);
-  return player;
-}
-
-
-
-
 var initGame = function () {
   createjs.Ticker.addListener(window);
   createjs.Ticker.useRAF = true;
@@ -193,15 +137,14 @@ var initGame = function () {
   if(connected){
     for(i in init_data.players){
       p = init_data.players[i];
-      stage.addChild(createPlayer("test", false, p.userid, p.x, p.y, p.vX, p.vY));    
+      createPlayer("test", false, p.userid, p.x, p.y, p.vX, p.vY); 
     }
     for(i in init_data.items){
-      stage.addChild(convertItem(init_data.items[i]));
+      convertItem(init_data.items[i]);
     }
 
   }
 };
-
 
 
 var tick = function () {

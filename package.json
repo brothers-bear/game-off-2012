@@ -12,7 +12,8 @@
     "connect-assets": "*",
     "coffee-script": "*",
     "socket.io": "*",
-    "node-uuid": "*"
+    "node-uuid": "*",
+    "underscore": "*"
   },
   "subdomain": "brothers-bear",
   "engines": {

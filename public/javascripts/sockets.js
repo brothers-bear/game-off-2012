@@ -12,6 +12,13 @@ $(function(){
   });
 });
 
+socket.on('item pickup', function(data){
+  stage.removeChild(items[data.itemid])
+  delete items[data.itemid];
+  // remove it from the stage
+  players[data.userid].score++;
+})
+
 //Now we can listen for that event
 socket.on('onconnected', function( data ) {
   //Note that the data is the object we sent from the server, as is. So we can assume its id exists. 
@@ -44,7 +51,7 @@ socket.on('loggedin', function(data) {
 
 /*  */
 socket.on('new player', function(data) {
-  stage.addChild(createPlayer(data.name, false, data.userid));
+  createPlayer(data.name, false, data.userid);
 });
 
 
@@ -76,6 +83,63 @@ function convertPlayer(server_player){
 function convertItem(server_item){
   console.log("got an item!");
 
-  return createItem(server_item.x, server_item.y, server_item.id, server_item.width, server_item.height, server_item.type);
+  return createItem(server_item.x, server_item.y, server_item.itemid, server_item.width, server_item.height, server_item.type);
 }
+
+
+function createItem(x, y, id, width, height, type){
+  // determine img by type
+  console.log(preloader.getResult('gem'))
+  var img = preloader.getResult('gem').src;
+  var moveAnimationSpeed = MOVE_ANIMATION_SPEED;
+  var item = new Item(img, width, height, moveAnimationSpeed);
+
+  item.x = x;
+  item.y = y;
+  item.itemid = id;
+  item.gotoAndStop('down');
+  item.snapToPixel = true;
+  item.type = type;
+
+  items[id] = item; 
+  stage.addChild(item);
+
+  return item;
+}
+
+// extrapolate player creation
+// should be called when player logs in and when other players join
+function createPlayer(name, isMe, userid, p_x, p_y, p_vX, p_vY){
+  // Create player character
+  var img = preloader.getResult('pirate_m2').src;
+  var width = 32;
+  var height = 48;
+  var moveAnimationSpeed = MOVE_ANIMATION_SPEED;
+  var player = new Character(img, width, height, moveAnimationSpeed);
+
+  // set id properties
+  player.name = name;
+  player.isMe = isMe;
+  player.userid = userid;
+
+  // set render properties
+  player.gotoAndStop('down');
+  player.x = p_x == undefined ? canvas.width/2 : p_x ;
+  player.xMin = 0 + width/2;
+  player.xMax = canvas.width - width/2;
+  player.y = p_y == undefined ? canvas.height / 2 : p_y;
+  player.yMin = 0 + height/2;
+  player.yMax = canvas.height - height/2;
+
+  player.vY = p_vY == undefined ? 0 : p_vY;
+  player.vX = p_vX == undefined ? 0 : p_vX;
+
+  player.snapToPixel = true;
+  players[userid] = player;
+
+  isMe && (me = player);
+  stage.addChild(player);
+  return player;
+}
+
 
