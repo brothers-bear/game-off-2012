@@ -2,15 +2,16 @@ extends layout
 
 block scripts
   // Third party libraries
-  script(src="/javascripts/jquery-1.8.2.min.js")
-  script(src="http://code.createjs.com/easeljs-0.5.0.min.js")
-  script(src="http://code.createjs.com/preloadjs-0.2.0.min.js")
+  script(src="/javascripts/lib/jquery-1.8.2.min.js")
+  script(src="/javascripts/lib/easeljs-0.5.0.min.js")
+  script(src="/javascripts/lib/preloadjs-0.2.0.min.js")
   // Local libraries
   script(src='/socket.io/socket.io.js')
-  script(src="/javascripts/client.js")
-  script(src="/javascripts/Character.js")
-  script(src="/javascripts/Item.js")
-  script(src="/javascripts/sockets.js")
+  script(src="/javascripts/game_mech/client.js")
+  script(src="/javascripts/game_mech/Character.js")
+  script(src="/javascripts/game_mech/Item.js")
+  script(src="/javascripts/game_mech/sockets.js")
+  link(rel='stylesheet', href='/stylesheets/lib/normalize.css')
 
 block content
   h1= title

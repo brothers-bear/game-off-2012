@@ -7,17 +7,17 @@ $(function(){
     e.preventDefault();
     socket.emit('login', { 
       name: $('input[name=user]').val(), 
-      password: $('input[name=pwd]').val(),
+      password: $('input[name=pwd]').val()
     }); 
   });
 });
 
 socket.on('item pickup', function(data){
-  stage.removeChild(items[data.itemid])
+  stage.removeChild(items[data.itemid]);
   delete items[data.itemid];
   // remove it from the stage
   players[data.userid].score++;
-})
+});
 
 //Now we can listen for that event
 socket.on('onconnected', function( data ) {
@@ -66,7 +66,7 @@ socket.on('player disconnect', function(data){
 });
 
 socket.on('create item', function(data){
-  convertItem(data.item)
+  convertItem(data.item);
 });
 
 
@@ -75,7 +75,7 @@ socket.on('create item', function(data){
 // takes in a player object given by the server, and applies it to the corresponding player in players
 function convertPlayer(server_player){
   // we iterate over our loop, so if it doesnt exist on the server, we remove it
-  for(i in server_player){
+  for(var i in server_player){
     players[server_player.userid][i] = server_player[i];
   }
 }
@@ -89,7 +89,7 @@ function convertItem(server_item){
 
 function createItem(x, y, id, width, height, type){
   // determine img by type
-  console.log(preloader.getResult('gem'))
+  console.log(preloader.getResult('gem'));
   var img = preloader.getResult('gem').src;
   var moveAnimationSpeed = MOVE_ANIMATION_SPEED;
   var item = new Item(img, width, height, moveAnimationSpeed);
@@ -124,15 +124,15 @@ function createPlayer(name, isMe, userid, p_x, p_y, p_vX, p_vY){
 
   // set render properties
   player.gotoAndStop('down');
-  player.x = p_x == undefined ? canvas.width/2 : p_x ;
+  player.x = p_x === undefined ? canvas.width/2 : p_x ;
   player.xMin = 0 + width/2;
   player.xMax = canvas.width - width/2;
-  player.y = p_y == undefined ? canvas.height / 2 : p_y;
+  player.y = p_y === undefined ? canvas.height / 2 : p_y;
   player.yMin = 0 + height/2;
   player.yMax = canvas.height - height/2;
 
-  player.vY = p_vY == undefined ? 0 : p_vY;
-  player.vX = p_vX == undefined ? 0 : p_vX;
+  player.vY = p_vY === undefined ? 0 : p_vY;
+  player.vX = p_vX === undefined ? 0 : p_vX;
 
   player.snapToPixel = true;
   players[userid] = player;
@@ -141,5 +141,24 @@ function createPlayer(name, isMe, userid, p_x, p_y, p_vX, p_vY){
   stage.addChild(player);
   return player;
 }
+
+
+function sendMessage(){
+  var message = $('#chatbox input').val();
+  if(message === '') return;
+  $('#chatbox input').val('');
+  console.log(message);
+  socket.emit('chat', {
+    userid: me.userid,
+    message: message
+  });
+}
+
+socket.on('chat', function(data){
+  var new_msg = $('#messages p').first().clone();
+  new_msg.find('.user').text(data.userid);
+  new_msg.find('.message').text(data.message);
+  new_msg.appendTo('#messages');
+});
 
 

@@ -13,7 +13,6 @@ var express = require('express')
   , server = http.createServer(app)
   , game_server = require('./server/game_server.js')
   ;
-
   
 exports.server = server;
 

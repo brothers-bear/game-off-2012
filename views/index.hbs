@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Git In Mah Belleh!</title>
+    <link href="/stylesheets/style.css" rel="stylesheet">
+    <!-- Third party libraries-->
+    <script src="/javascripts/lib/jquery-1.8.2.min.js"></script>
+    <script src="/javascripts/lib/easeljs-0.5.0.min.js"></script>
+    <script src="/javascripts/lib/preloadjs-0.2.0.min.js"></script><!-- Local libraries-->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/javascripts/game_mech/client.js"></script>
+    <script src="/javascripts/game_mech/Character.js"></script>
+    <script src="/javascripts/game_mech/Item.js"></script>
+    <script src="/javascripts/game_mech/sockets.js"></script>
+    <link href="/stylesheets/lib/normalize.css" rel="stylesheet">
+</head>
+
+<body>
+  <h1>{{{title}}}</h1>
+
+    <form action="#" id="login_form" method="get" name="login_form">
+      Username:<input name="user" type="text" />
+      Password:<input name="pwd" type="text" />
+      <input name="login" type="submit" value="Submit" />
+    </form>
+    <canvas id="game" tabindex="1"></canvas>
+    <div id="chatbox">
+      <div id="messages">
+        <p> <span class="user">David</span>: <span class="message">sample message </span> </p>
+      </div>
+      <input id="chat" placeholder="Type your message here"/>
+    </div>
+</body>
+</html>

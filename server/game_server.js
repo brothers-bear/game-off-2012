@@ -1,7 +1,7 @@
-var io  = require('socket.io')
-  , UUID = require('node-uuid')
-  , QuadTree = require('./QuadTree.js').QuadTree
-  , _ = require('underscore') 
+var io  = require('socket.io'),
+    UUID = require('node-uuid'),
+    QuadTree = require('./QuadTree.js').QuadTree,
+    _ = require('underscore') 
   ;
 
 var CANVAS_WIDTH = 800;
@@ -20,7 +20,7 @@ exports.start = function(server){
   var players = {};
   var items = {};
 
-  var map = new QuadTree({left:0, right:CANVAS_WIDTH, top: 0, bottom: CANVAS_HEIGHT}, 3, 4)
+  var map = new QuadTree({left:0, right:CANVAS_WIDTH, top: 0, bottom: CANVAS_HEIGHT}, 3, 4);
   
 
   var FPS = 60;
@@ -80,18 +80,18 @@ exports.start = function(server){
         height: 48,
         width: 20,    // TODO: Refactor this into the createPlayer method (HARDCODED ATM)
         score: 0
-      }
+      };
 
       map.insert(new_player);
-      console.log(map)
-      console.log(map)
+      console.log(map);
+      console.log(map);
       //map.printTree();
 
       players[client.userid] = new_player;
       // for future logging in, check auth (success)
       client.emit('loggedin', { 
           success: true, 
-          userid: client.userid,
+          userid: client.userid
       });
       // broadcast to all other sockets
       client.broadcast.emit('new player', { name: data.name, userid: client.userid });
@@ -128,14 +128,27 @@ exports.start = function(server){
       players[data.userid].vX = 0;
       players[data.userid].vY = 0;
     });
+
+    client.on('chat', function(data){
+      // should check for server validation here
+      console.log(data.message);
+      console.log(data.userid);
+      sio.sockets.emit('chat', data);
+    });
     
   }); //sio.sockets.on connection
 
+
+
+  
+
+
+
   //update movement
   function gameTick(){
-    for(i in players) {
-      console.log("is it colliding?")
-      console.log("this is colliding: " + map.colliding(players[i]))
+    for(var i in players) {
+      // console.log("is it colliding?");
+      // console.log("this is colliding: " + map.colliding(players[i]));
       
       p = players[i];
       p.x = p.x + p.vX;
@@ -149,12 +162,12 @@ exports.start = function(server){
         
         if(typeof collision.itemid !== 'undefined') {
           // collected an item!
-          map.remove(collision)
+          map.remove(collision);
           delete items[collision.itemid];
           sio.sockets.emit('item pickup', {
             itemid: collision.itemid, 
             userid: p.userid
-          })
+          });
           p.score++;
           // generate a new one
           createServerItem(Math.random()*CANVAS_WIDTH,Math.random()*CANVAS_HEIGHT,0,16,16,"power");
@@ -170,24 +183,24 @@ exports.start = function(server){
       }
       // redo x and y so it isn't beyond boundaries
     }
-    for(i in items) {
-      item = items[i];
+    for(var j in items) {
+      item = items[j];
       item.x = item.x;
       item.y = item.y;
       // redo x and y so it isn't beyond boundaries
     }
     // check for collision: Quadtree implementation
     
-    if(map.root.players.length > 0){
-      console.log('yes!')
-      console.log(map.root.players[0])
-      console.log(map.root.players[1])
-    }
+    // if(map.root.players.length > 0){
+    //   console.log('yes!');
+    //   console.log(map.root.players[0]);
+    //   console.log(map.root.players[1]);
+    // }
     //console.log(map)
     map.clear();
     //console.log(map)
-    _.each(players, function(item){ map.insert(item) })
-    _.each(items, function(item){ map.insert(item) })
+    _.each(players, function(item){ map.insert(item); });
+    _.each(items, function(item){ map.insert(item); });
     
   }
 
@@ -201,12 +214,12 @@ exports.start = function(server){
       width: width,
       height: height,
       type: type
-    }
+    };
     console.log("gets called");
-    sio.sockets.emit('create item', { item: items[id]})
+    sio.sockets.emit('create item', { item: items[id]});
     return items[id];
   }
   
 
-}
+};
 

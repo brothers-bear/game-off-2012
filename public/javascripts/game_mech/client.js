@@ -9,6 +9,7 @@ var KEYCODE_A = 65;     //useful keycode
 var KEYCODE_W = 87;     //useful keycode
 var KEYCODE_D = 68;     //useful keycode
 var KEYCODE_S = 83;     //useful keycode
+var KEYCODE_ENTER = 13;
 
 var TARGET_FPS = 60;
 var MOVE_SPEED = 2;
@@ -24,7 +25,7 @@ var stage;
 
 // Moving objects (all existing players)
 var players = {};
-var items = {}
+var items = {};
 
 // object of you
 var me;
@@ -49,8 +50,14 @@ $(function () {
   eventHandlers();
 });
 
-
 function eventHandlers(){
+  $('#chatbox input').keydown(function (event){
+    if (!event) { event = window.event; }
+    if(event.keyCode === KEYCODE_ENTER ) {
+      sendMessage();
+      $('#game').focus();
+    }
+  });
   $('#game').keydown(function (event) {
     // cross-browser compatibility
     if (!event) { event = window.event; }
@@ -80,10 +87,19 @@ function eventHandlers(){
         if (!downHeld)
           downHeld = new Date().getTime();
         break;
+      case KEYCODE_ENTER:
+        event.preventDefault();
+        socket.emit('server stop', {userid: me.userid});
+        leftHeld = false; 
+        upHeld = false; 
+        rightHeld = false; 
+        downHeld = false; 
+        $('#chatbox input').focus();
+        break;
     }
   });
 
-  $(document).keyup(function (event) {
+  $('#game').keyup(function (event) {
     // cross-browser compatibility
     if (!event) { event = window.event; }
     switch(event.keyCode) {
@@ -120,7 +136,7 @@ var initCanvas = function () {
 
   var manifest = [
     {src: '/images/gem.png', id: 'gem'},
-    {src: '/images/pirate_m2.png', id: 'pirate_m2'},
+    {src: '/images/pirate_m2.png', id: 'pirate_m2'}
   ];
 
   preloader = new createjs.PreloadJS();
@@ -135,12 +151,12 @@ var initGame = function () {
   createjs.Ticker.setFPS(TARGET_FPS);
 
   if(connected){
-    for(i in init_data.players){
+    for(var i in init_data.players){
       p = init_data.players[i];
       createPlayer("test", false, p.userid, p.x, p.y, p.vX, p.vY); 
     }
-    for(i in init_data.items){
-      convertItem(init_data.items[i]);
+    for(var j in init_data.items){
+      convertItem(init_data.items[j]);
     }
 
   }
@@ -152,27 +168,27 @@ var tick = function () {
   switch (mostRecentKey) {
     case leftHeld: 
       me.vX = -MOVE_SPEED; 
-      socket.emit("server move", { dir: 'L', speed: MOVE_SPEED})
+      socket.emit("server move", { dir: 'L', speed: MOVE_SPEED});
       break;
     case upHeld: 
       me.vY = -MOVE_SPEED; 
-      socket.emit("server move", { dir: 'U', speed: MOVE_SPEED})
+      socket.emit("server move", { dir: 'U', speed: MOVE_SPEED});
       break;
     case rightHeld: 
       me.vX = MOVE_SPEED; 
-      socket.emit("server move", { dir: 'R', speed: MOVE_SPEED})
+      socket.emit("server move", { dir: 'R', speed: MOVE_SPEED});
       break;
     case downHeld: 
-      socket.emit("server move", { dir: 'D', speed: MOVE_SPEED})
+      socket.emit("server move", { dir: 'D', speed: MOVE_SPEED});
       me.vY = MOVE_SPEED; 
       break;
   }
   
-  for(i in players){
+  for(var i in players){
     players[i].tick();
   }
-  for(i in items){
-    items[i].tick();
+  for(var j in items){
+    items[j].tick();
   }
   stage.update();
 };
