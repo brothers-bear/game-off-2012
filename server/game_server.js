@@ -1,12 +1,13 @@
 var io  = require('socket.io'),
     UUID = require('node-uuid'),
     QuadTree = require('./QuadTree.js').QuadTree,
-    _ = require('underscore') 
+    _ = require('underscore'),
+    sPlayer = require('./sPlayer.js').sPlayer,
+    sItem = require('./sItem.js').sItem
   ;
 
 var CANVAS_WIDTH = 800;
 var CANVAS_HEIGHT = 600;
-
 
 exports.start = function(server){
   var sio = io.listen(server);
@@ -68,20 +69,9 @@ exports.start = function(server){
       client.broadcast.emit('player disconnect', { userid: client.userid });
     }); // client.on disconnect
     client.on('login', function (data) {
-      console.log('user:' + data.name + ' pwd:' + data.password); 
+      console.log('user:' + data.username + ' pwd:' + data.password); 
       // if successful, return player object back, and push a new player to list
-      var new_player = {
-        userid: client.userid,
-        name: data.name,
-        vX: 0,
-        vY: 0,
-        x: 400,
-        y: 300,
-        height: 48,
-        width: 20,    // TODO: Refactor this into the createPlayer method (HARDCODED ATM)
-        score: 0
-      };
-
+      var new_player = new sPlayer(client.userid, data.username);
       map.insert(new_player);
       console.log(map);
       console.log(map);
@@ -94,7 +84,7 @@ exports.start = function(server){
           userid: client.userid
       });
       // broadcast to all other sockets
-      client.broadcast.emit('new player', { name: data.name, userid: client.userid });
+      client.broadcast.emit('new player', { username: data.username, userid: client.userid });
     });
 
 
@@ -132,7 +122,7 @@ exports.start = function(server){
     client.on('chat', function(data){
       // should check for server validation here
       console.log(data.message);
-      console.log(data.userid);
+      console.log(data.username);
       sio.sockets.emit('chat', data);
     });
     
@@ -207,15 +197,7 @@ exports.start = function(server){
   setInterval(gameTick, 1000/FPS); 
 
   function createServerItem(x, y, id, width, height, type){
-    items[id] = {
-      x: x,
-      y: y,
-      itemid: id,
-      width: width,
-      height: height,
-      type: type
-    };
-    console.log("gets called");
+    items[id] = new sItem(x, y, id, width, height, type);
     sio.sockets.emit('create item', { item: items[id]});
     return items[id];
   }

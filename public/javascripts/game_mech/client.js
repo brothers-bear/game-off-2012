@@ -11,6 +11,9 @@ var KEYCODE_D = 68;     //useful keycode
 var KEYCODE_S = 83;     //useful keycode
 var KEYCODE_ENTER = 13;
 
+var PLAYER_WIDTH = 32;
+var PLAYER_HEIGHT = 48;
+
 var TARGET_FPS = 60;
 var MOVE_SPEED = 2;
 var MOVE_ANIMATION_SPEED = 3 * MOVE_SPEED; // smaller = faster
@@ -153,7 +156,8 @@ var initGame = function () {
   if(connected){
     for(var i in init_data.players){
       p = init_data.players[i];
-      createPlayer("test", false, p.userid, p.x, p.y, p.vX, p.vY); 
+      convertPlayer(p);
+      //createPlayer("test", false, p.userid, p.x, p.y, p.vX, p.vY); 
     }
     for(var j in init_data.items){
       convertItem(init_data.items[j]);

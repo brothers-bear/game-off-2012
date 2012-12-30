@@ -1,12 +1,11 @@
 
 //This is all that needs
 var socket = io.connect('/');
-
 $(function(){
   $('input[name=login]').click(function(e){
     e.preventDefault();
     socket.emit('login', { 
-      name: $('input[name=user]').val(), 
+      username: $('input[name=user]').val(), 
       password: $('input[name=pwd]').val()
     }); 
   });
@@ -44,20 +43,20 @@ socket.on('onconnected', function( data ) {
 socket.on('loggedin', function(data) {
   if(data.success === true) {
     //create player
-    me = createPlayer($('input[name=user]').val(), true, data.userid);
+    me = createPlayer($('input[name=user]').val(), true, data.userid, PLAYER_WIDTH, PLAYER_HEIGHT);
     stage.addChild(me);
   }
 });
 
 /*  */
 socket.on('new player', function(data) {
-  createPlayer(data.name, false, data.userid);
+  createPlayer(data.username, false, data.userid, PLAYER_WIDTH, PLAYER_HEIGHT);
 });
 
 
 /* received a message that anohter player moved */
 socket.on('client move', function(data){
-  convertPlayer(data.player);
+  updatePlayer(data.player);
 });
 
 socket.on('player disconnect', function(data){
@@ -72,12 +71,21 @@ socket.on('create item', function(data){
 
 
 
-// takes in a player object given by the server, and applies it to the corresponding player in players
-function convertPlayer(server_player){
+// takes in a player object given by the server, and updates the corresponding player in players used by move
+function updatePlayer(server_player){
   // we iterate over our loop, so if it doesnt exist on the server, we remove it
   for(var i in server_player){
     players[server_player.userid][i] = server_player[i];
   }
+//function createPlayer(name, isMe, userid, p_x, p_y, p_vX, p_vY){
+  //return createPlayer(server_player.name, server_player.isMe, server_player);
+}
+
+// takes in a player object given by the server, and applies it to the corresponding player in players
+function convertPlayer(server_player){
+  console.log('created a player!');
+  // multiply width by 4/3 to account for server/spritesheet
+  return createPlayer(server_player.username, false, server_player.userid, server_player.width * 4/3, server_player.height, server_player.x, server_player.y, server_player.vX, server_player.vY);
 }
 
 function convertItem(server_item){
@@ -109,16 +117,16 @@ function createItem(x, y, id, width, height, type){
 
 // extrapolate player creation
 // should be called when player logs in and when other players join
-function createPlayer(name, isMe, userid, p_x, p_y, p_vX, p_vY){
+function createPlayer(name, isMe, userid, w, h, p_x, p_y, p_vX, p_vY){
   // Create player character
   var img = preloader.getResult('pirate_m2').src;
-  var width = 32;
-  var height = 48;
+  var width = w;
+  var height = h;
   var moveAnimationSpeed = MOVE_ANIMATION_SPEED;
   var player = new Character(img, width, height, moveAnimationSpeed);
 
   // set id properties
-  player.name = name;
+  player.username = name;
   player.isMe = isMe;
   player.userid = userid;
 
@@ -149,14 +157,14 @@ function sendMessage(){
   $('#chatbox input').val('');
   console.log(message);
   socket.emit('chat', {
-    userid: me.userid,
+    username: me.username,
     message: message
   });
 }
 
 socket.on('chat', function(data){
   var new_msg = $('#messages p').first().clone();
-  new_msg.find('.user').text(data.userid);
+  new_msg.find('.user').text(data.username);
   new_msg.find('.message').text(data.message);
   new_msg.appendTo('#messages');
 });
