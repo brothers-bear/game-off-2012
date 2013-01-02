@@ -3,16 +3,35 @@
  * Module dependencies.
  */
 
-var express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
-  , app = express()
-  , admin = require('./routes/admin')
-  , http = require('http')
-  , path = require('path')
-  , server = http.createServer(app)
-  , game_server = require('./server/game_server.js')
+var express = require('express'),
+  routes = require('./routes'),
+  user = require('./routes/user'),
+  app = express(),
+  admin = require('./routes/admin'),
+  http = require('http'),
+  path = require('path'),
+  server = http.createServer(app),
+  game_server = require('./server/game_server.js'),
+  mongoose = require("mongoose"),
+  MongoStore = require('connect-mongo')(express)
   ;
+
+ settings = 
+   {
+     db: "game-off",
+     // collection: "sessions"
+     // host: ,
+     // port: ,
+     // username:,
+     // password:,
+     // auto_reconnect:,
+     // url: ,
+     // mongoose_connection:,
+     // clear_interval:,
+     // stringify:,
+     cookie_secret: "COOKIE SECRET"
+   };
+ 
   
 exports.server = server;
 
@@ -25,11 +44,21 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
+  app.use(express.cookieParser, settings.cookie_secret);
+  app.use(express.session({
+    secret: settings.cookie_secret,
+    store: new MongoStore({
+      db: settings.db
+    })
+  }));
   app.use(express.static(path.join(__dirname, 'public')));
+
+
 });
 
 app.configure('development', function(){
   app.use(express.errorHandler());
+  mongoose.connect('mongodb://localhost/game-off');
 });
 
 app.get('/', routes.index);

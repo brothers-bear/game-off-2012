@@ -14,7 +14,9 @@
     "socket.io": "*",
     "node-uuid": "*",
     "underscore": "*",
-    "hbs": "*"
+    "hbs": "*",
+    "mongoose": "*",
+    "connect-mongo": "*"
   },
   "subdomain": "brothers-bear",
   "engines": {
